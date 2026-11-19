@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>SOLARIS BAY: GOLDEN HEAT</title>
+ <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+ <div id="app">
+  <canvas id="gl-canvas"></canvas>
+  <!-- Reticle for on-foot aiming -->
+  <div id="reticle" class="hidden">
+   <div class="reticle-ring"></div>
+   <div class="reticle-dot"></div>
+  </div>
+  <!-- Action prompt (Enter Vehicle, Solis Customs, Safehouse) -->
+  <div id="action-prompt" class="hidden"></div>
+  <!-- Center Toast / Banner (Mission Complete, Stunt Jump, Wasted, Busted) -->
+  <div id="center-banner" class="hidden">
+   <div id="banner-kicker"></div>
+   <div id="banner-title"></div>
+   <div id="banner-sub"></div>
+  </div>
+  <!-- Main Gameplay HUD -->
+  <div id="hud" class="hidden">
+   <!-- Top Left: Mission Card + Live SBPD Dispatch -->
+   <div id="hud-tl">
+    <div id="mission-card" class="hud-panel">
+     <div class="panel-header">
+      <span id="mission-tag" class="tag-gold">MISSION 01</span>
+      <span id="mission-timer" class="tag-timer hidden">01:45</span>
+     </div>
+     <div id="mission-title">GOLDEN ARRIVAL</div>
+     <div id="mission-obj">Drive the Solis GT to Coral Marina</div>
+     <div class="mission-meta">
+      <span id="mission-dist">320m</span>
+      <span id="mission-reward">$3,500 · +120 REP</span>
+     </div>
+    </div>
+    <div id="dispatch-panel" class="hud-panel hidden">
+     <div class="panel-header">
+      <span class="tag-police">SBPD LIVE DISPATCH</span>
+      <span id="dispatch-count" class="dispatch-units">4 UNITS</span>
+     </div>
+     <div id="dispatch-list"></div>
+    </div>
+   </div>
+   <!-- Top Right: Clock, Cash, Wanted Stars, Weapon Bar -->
+   <div id="hud-tr">
+    <div class="status-strip hud-panel">
+     <div class="clock-cash">
+      <span id="hud-clock">18:42</span>
+      <span id="hud-cash">$42,850</span>
+     </div>
+     <div class="wanted-row">
+      <div id="wanted-stars" aria-label="Wanted level"></div>
+      <span id="sight-badge" class="sight-badge hidden">IN SIGHT</span>
+     </div>
+    </div>
+    <div id="weapon-bar" class="hud-panel"></div>
+   </div>
+   <!-- Bottom Left: Circular Minimap + District Plaque + Vitals -->
+   <div id="hud-bl">
+    <div class="minimap-wrap">
+     <canvas id="minimap-canvas" width="184" height="184"></canvas>
+     <div class="minimap-north">N</div>
+     <div class="minimap-ring"></div>
+    </div>
+    <div class="vitals-stack">
+     <div id="district-plaque" class="district-plaque">MALECÓN DEL SOL</div>
+     <div class="bars-panel hud-panel">
+      <div class="bar-row">
+       <span class="bar-lbl">HP</span>
+       <div class="bar-track"><div id="bar-hp" class="bar-fill fill-hp"></div></div>
+       <span id="val-hp" class="bar-val">100</span>
+      </div>
+      <div class="bar-row">
+       <span class="bar-lbl">AR</span>
+       <div class="bar-track"><div id="bar-ar" class="bar-fill fill-ar"></div></div>
+       <span id="val-ar" class="bar-val">80</span>
+      </div>
+      <div class="bar-row">
+       <span class="bar-lbl">REP</span>
+       <div class="bar-track"><div id="bar-rep" class="bar-fill fill-rep"></div></div>
+       <span id="val-rep" class="bar-val">420</span>
+      </div>
+     </div>
+    </div>
+   </div>
+   <!-- Bottom Center: Character Dialogue -->
+   <div id="dialogue-box" class="hud-panel hidden">
+    <canvas id="dialogue-portrait" width="68" height="68"></canvas>
+    <div class="dialogue-copy">
+     <div class="dialogue-head">
+      <span id="dialogue-speaker">ELENA</span>
+      <span id="dialogue-role">DRIVER / FIXER</span>
+     </div>
+     <div id="dialogue-text">Stay on the Malecón, Rafael. Air-1 is sweeping the palms — hit Solis Customs!</div>
+    </div>
+   </div>
+   <!-- Bottom Right: Radio Widget + Speedometer -->
+   <div id="hud-br">
+    <div id="radio-widget" class="hud-panel">
+     <div class="radio-top">
+      <span id="radio-station">SOLARIS 98.7</span>
+      <div class="eq-bars" id="eq-bars"><i></i><i></i><i></i><i></i><i></i></div>
+     </div>
+     <div id="radio-track">Golden Coastline — Neon Palms</div>
+    </div>
+    <div id="vehicle-widget" class="hud-panel">
+     <div class="speed-main">
+      <span id="speed-num">118</span>
+      <div class="speed-side">
+       <span class="speed-unit">MPH</span>
+       <span id="speed-gear" class="gear-badge">5</span>
+      </div>
+     </div>
+     <div id="vehicle-name">SOLIS GT</div>
+     <div class="veh-bars">
+      <div class="veh-bar-item">
+       <span>BOOST</span>
+       <div class="mini-track"><div id="bar-boost" class="mini-fill fill-boost"></div></div>
+      </div>
+      <div class="veh-bar-item">
+       <span>HULL</span>
+       <div class="mini-track"><div id="bar-hull" class="mini-fill fill-hull"></div></div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <!-- Start Screen Overlay -->
+  <div id="start-overlay" class="overlay">
+   <div class="start-card">
+    <div class="start-kicker">SUN-SOAKED COASTAL CRIME SANDBOX</div>
+    <h1 class="start-title">SOLARIS BAY<span>GOLDEN HEAT</span></h1>
+    <p class="start-desc">Rule five sunlit districts from Malecón del Sol to Industrial Docks. Outrun SBPD Air-1, customize your Solis GT at Solis Customs, and complete an 8-mission syndicate campaign.</p>
+    <div class="start-actions">
+     <button id="btn-play" class="btn btn-primary">ENTER SOLARIS BAY</button>
+     <button id="btn-continue" class="btn btn-secondary hidden">CONTINUE SAVE</button>
+     <button id="btn-controls-start" class="btn btn-ghost">CONTROLS</button>
+    </div>
+    <div class="start-hints">
+     <span><b>WASD</b> Drive / Move</span>
+     <span><b>SPACE</b> Drift / Sprint</span>
+     <span><b>E / F</b> Enter / Carjack</span>
+     <span><b>LMB</b> Fire</span>
+     <span><b>1-5</b> Weapons</span>
+     <span><b>R</b> Radio</span>
+     <span><b>M / ESC</b> Map &amp; Menu</span>
+    </div>
+   </div>
+  </div>
+  <!-- Solis Customs Garage Panel -->
+  <div id="garage-overlay" class="overlay overlay-side hidden">
+   <div class="garage-panel hud-panel">
+    <div class="garage-head">
+     <div>
+      <div class="tag-gold">SOLIS CUSTOMS · CORAL MARINA</div>
+      <h2>GARAGE &amp; RESPRAY</h2>
+     </div>
+     <div class="garage-cash" id="garage-cash">$42,850</div>
+    </div>
+    <div class="garage-vehicle-bar">
+     <span id="garage-veh-name">SOLIS GT</span>
+     <span id="garage-veh-stats">TOP 148 MPH · ARMOR LV.2</span>
+    </div>
+    <div class="garage-section">
+     <div class="section-label">METALLIC RESPRAY ($400 · CLEARS WANTED HEAT)</div>
+     <div id="paint-grid" class="paint-grid"></div>
+    </div>
+    <div class="garage-section">
+     <div class="section-label">PERFORMANCE &amp; DEFENSE UPGRADES</div>
+     <div id="upgrade-list" class="upgrade-list"></div>
+    </div>
+    <div class="garage-footer">
+     <button id="btn-garage-respray" class="btn btn-primary">RESPRAY &amp; CLEAR HEAT ($400)</button>
+     <button id="btn-garage-exit" class="btn btn-secondary">DRIVE OUT [G / ESC]</button>
+    </div>
+   </div>
+  </div>
+  <!-- Pause / City Map / Campaign / Save Menu -->
+  <div id="menu-overlay" class="overlay hidden">
+   <div class="menu-shell hud-panel">
+    <div class="menu-topbar">
+     <div class="menu-brand">
+      <span class="tag-gold">SOLARIS BAY</span>
+      <span class="menu-sub">GOLDEN HEAT · PAUSE &amp; CITY NETWORK</span>
+     </div>
+     <div class="menu-tabs" id="menu-tabs">
+      <button class="tab-btn active" data-tab="map">CITY MAP</button>
+      <button class="tab-btn" data-tab="missions">CAMPAIGN (8)</button>
+      <button class="tab-btn" data-tab="save">SAVE / LOAD</button>
+      <button class="tab-btn" data-tab="controls">CONTROLS</button>
+     </div>
+     <button id="btn-resume" class="btn btn-primary btn-sm">RESUME [ESC]</button>
+    </div>
+    <div class="menu-body">
+     <!-- Tab: City Map -->
+     <div id="tab-map" class="tab-pane active">
+      <div class="map-layout">
+       <div class="map-canvas-wrap">
+        <canvas id="citymap-canvas" width="640" height="440"></canvas>
+        <div class="map-hint">Click anywhere on Solaris Bay to set a custom GPS waypoint</div>
+       </div>
+       <div class="map-sidebar">
+        <div class="sidebar-card">
+         <div class="section-label">FIVE DISTRICTS</div>
+         <div id="district-legend" class="legend-list"></div>
+        </div>
+        <div class="sidebar-card">
+         <div class="section-label">PLAYER DOSSIER</div>
+         <div id="player-stats" class="stats-grid"></div>
+        </div>
+       </div>
+      </div>
+     </div>
+     <!-- Tab: 8-Mission Campaign -->
+     <div id="tab-missions" class="tab-pane">
+      <div id="campaign-list" class="campaign-grid"></div>
+     </div>
+     <!-- Tab: Save / Load -->
+     <div id="tab-save" class="tab-pane">
+      <div class="save-layout">
+       <div class="save-card">
+        <h3>LOCAL STORAGE SLOTS</h3>
+        <p>Save your cash, respect, Solis Customs upgrades, vehicle paint, and campaign progress offline in this browser.</p>
+        <div id="save-slots" class="save-slots"></div>
+       </div>
+      </div>
+     </div>
+     <!-- Tab: Controls -->
+     <div id="tab-controls" class="tab-pane">
+      <div class="controls-grid">
+       <div class="ctrl-card">
+        <h4>DRIVING &amp; EXPLORATION</h4>
+        <ul>
+         <li><b>W / S / A / D</b> or Arrows — Accelerate, Brake/Reverse, Steer</li>
+         <li><b>SPACE</b> — Handbrake Drift (in car) / Sprint (on foot)</li>
+         <li><b>SHIFT</b> — Nitro Boost (when installed/charged)</li>
+         <li><b>E</b> or <b>F</b> — Enter / Exit / Carjack Nearest Vehicle</li>
+         <li><b>R</b> — Cycle Radio (SOLARIS 98.7 / BAYSIDE FM / NEON PULSE)</li>
+         <li><b>G</b> — Enter Solis Customs Garage (when near bay)</li>
+        </ul>
+       </div>
+       <div class="ctrl-card">
+        <h4>COMBAT &amp; CITY NETWORK</h4>
+        <ul>
+         <li><b>Mouse Move</b> — Aim &amp; Look (on foot)</li>
+         <li><b>Left Click</b> or <b>J</b> — Fire Active Weapon / Melee</li>
+         <li><b>1 – 5</b> or <b>Q</b> — Switch Weapons (Fists to Horizon Rifle)</li>
+         <li><b>M</b> or <b>ESC</b> — Pause, Interactive City Map &amp; Campaign</li>
+         <li><b>H</b> — Quick Horn / Siren Toggle (in SBPD Interceptor)</li>
+         <li><b>K</b> — Quick-Save to Slot 1</li>
+        </ul>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+ <script type="module" src="./src/main.js"></script>
+</body>
+</html>
