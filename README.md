@@ -1,8 +1,10 @@
 # SOLARIS BAY: GOLDEN HEAT
 
-![gta6-01](https://make.fun/badge/gta6-01.svg)
-![Rank](https://make.fun/badge/gta6-01/rey007123/gta6-01/rank.svg)
-![Reward](https://make.fun/badge/gta6-01/rey007123/gta6-01/reward.svg)
+[![make.fun · gta6-01](https://make.fun/badge/gta6-01.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+[![rank](https://make.fun/badge/gta6-01/rey007123/gta6-01/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+[![reward](https://make.fun/badge/gta6-01/rey007123/gta6-01/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+
+Entry for the [make.fun gta6-01 ("Make GTA 6") bounty](https://make.fun/bounty/gta6-01).
 
 A 100% original, zero-dependency, offline WebGL2 coastal open-world crime sandbox set in **Solaris Bay** at golden hour.
 
